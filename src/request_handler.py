@@ -1,5 +1,6 @@
 import socketserver
-from database import DatabaseConnection, LoginTakenError
+from database import DatabaseConnection, LoginTakenError, LoginNotFoundError, PasswordError
+from user_management import UserManager
 from responses import Responses
 
 
@@ -13,8 +14,7 @@ class RequestHandler(socketserver.BaseRequestHandler):
     def handle_signup_request(self, request):
         try:
             email, login, password = request.split(self.DELIMITER)
-            db = DatabaseConnection()
-            db.add_user(email, login, password)
+            DatabaseConnection().add_user(email, login, password)
             response = Responses.SignUpResponse.get_positive_response()
         except ValueError:
             raise InvalidRequestError()
@@ -24,7 +24,19 @@ class RequestHandler(socketserver.BaseRequestHandler):
         self.request.sendall(response)
 
     def handle_login_request(self, request):
-        pass
+        try:
+            login, password = request.split(self.DELIMITER)
+            DatabaseConnection().verify_login(login, password)
+            key = UserManager.sign_in(login, self.request)
+            response = Responses.LogInResponse.get_positive_response(key)
+        except ValueError:
+            raise InvalidRequestError()
+        except LoginNotFoundError:
+            response = Responses.LogInResponse.get_wrong_login_response()
+        except PasswordError:
+            response = Responses.LogInResponse.get_wrong_password_response()
+
+        self.request.sendall(response)
 
     def handle_logout_request(self, request):
         pass
