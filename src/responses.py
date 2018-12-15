@@ -13,7 +13,7 @@ class Responses:
             flag = 4
             return prefix.to_bytes(1, "big") + flag.to_bytes(1, "big")
 
-    class LogInResponse:git diff
+    class LogInResponse:
         @staticmethod
         def get_positive_response(key):
             prefix = 0x01
