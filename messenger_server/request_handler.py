@@ -11,9 +11,9 @@ class InvalidRequestError(Exception):
 class RequestHandler(socketserver.BaseRequestHandler):
     DELIMITER = '\r'
 
-    def handle_signup_request(self, request):
+    def handle_signup_request(self, signup_request):
         try:
-            email, login, password = request.split(self.DELIMITER)
+            email, login, password = signup_request.split(self.DELIMITER)
             DatabaseConnection().add_user(email, login, password)
             response = Responses.SignUpResponse.get_positive_response()
         except ValueError:
@@ -23,9 +23,9 @@ class RequestHandler(socketserver.BaseRequestHandler):
 
         self.request.sendall(response)
 
-    def handle_login_request(self, request):
+    def handle_login_request(self, login_request):
         try:
-            login, password = request.split(self.DELIMITER)
+            login, password = login_request.split(self.DELIMITER)
             DatabaseConnection().verify_login(login, password)
             key = UserManager.sign_in(login, self.request)
             response = Responses.LogInResponse.get_positive_response(key)
@@ -38,7 +38,7 @@ class RequestHandler(socketserver.BaseRequestHandler):
 
         self.request.sendall(response)
 
-    def handle_logout_request(self, request):
+    def handle_logout_request(self, logout_request):
         pass
 
     prefixes_to_methods = {

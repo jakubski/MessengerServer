@@ -18,10 +18,9 @@ class UserManager:
 
         while True:
             key = randrange(0, cls._range)
-            if all(
-                user.key != key
-                for user in cls._online_users):
-                    break
+            if all(user.key != key
+                   for user in cls._online_users):
+                break
 
         cls._online_users.append(OnlineUser(login, key, socket))
 
