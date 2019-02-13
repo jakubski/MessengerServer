@@ -31,3 +31,16 @@ class Responses:
             prefix = 0x01
             flag = 2
             return prefix.to_bytes(1, "big") + flag.to_bytes(1, "big")
+
+    class AddContactResponse:
+        @staticmethod
+        def get_positive_response():
+            prefix = 0x04
+            flag = 0
+            return prefix.to_bytes(1, "big") + flag.to_bytes(1, "big")
+
+        @staticmethod
+        def get_user_not_found_response():
+            prefix = 0x04
+            flag = 1
+            return prefix.to_bytes(1, "big") + flag.to_bytes(1, "big")

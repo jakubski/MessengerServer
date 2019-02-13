@@ -1,7 +1,7 @@
 import socketserver
-from database import DatabaseConnection, LoginTakenError, LoginNotFoundError, PasswordError
-from user_management import UserManager
-from responses import Responses
+from messenger_server.database import *
+from messenger_server.user_management import UserManager
+from messenger_server.responses import Responses
 
 
 class InvalidRequestError(Exception):
@@ -13,7 +13,7 @@ class RequestHandler(socketserver.BaseRequestHandler):
 
     def handle_signup_request(self, signup_request):
         try:
-            email, login, password = signup_request.split(self.DELIMITER)
+            email, login, password = signup_request.decode("utf-8", "replace").split(self.DELIMITER)
             DatabaseConnection().add_user(email, login, password)
             response = Responses.SignUpResponse.get_positive_response()
         except ValueError:
@@ -25,16 +25,35 @@ class RequestHandler(socketserver.BaseRequestHandler):
 
     def handle_login_request(self, login_request):
         try:
-            login, password = login_request.split(self.DELIMITER)
+            login, password = login_request.decode("utf-8", "replace").split(self.DELIMITER)
             DatabaseConnection().verify_login(login, password)
             key = UserManager.sign_in(login, self.request)
             response = Responses.LogInResponse.get_positive_response(key)
+            # notify users who have this user in their contacts
+            # check for awaiting messages
         except ValueError:
             raise InvalidRequestError()
         except LoginNotFoundError:
             response = Responses.LogInResponse.get_wrong_login_response()
         except PasswordError:
             response = Responses.LogInResponse.get_wrong_password_response()
+
+        self.request.sendall(response)
+
+    def handle_add_contact_request(self, add_contact_request):
+        try:
+            key = int.from_bytes(add_contact_request[:6], "big")
+            contact_login = add_contact_request[6:].decode("utf-8", "replace")
+            user = UserManager.get_online_user_by_key(key)
+            DatabaseConnection().add_contact(user.login, contact_login)
+            response = Responses.AddContactResponse.get_positive_response()
+        except ValueError:
+            raise InvalidRequestError()
+        except ContactExistingError:
+            # in theory the client side should prevent such travesty
+            response = Responses.AddContactResponse.get_positive_response()
+        except UserNotFoundError:
+            response = Responses.AddContactResponse.get_user_not_found_response()
 
         self.request.sendall(response)
 
@@ -45,6 +64,7 @@ class RequestHandler(socketserver.BaseRequestHandler):
         0x00: handle_signup_request,
         0x01: handle_login_request,
         0x02: handle_logout_request,
+        0x04: handle_add_contact_request,
     }
 
     def handle(self):
@@ -54,7 +74,7 @@ class RequestHandler(socketserver.BaseRequestHandler):
                 if data:
                     prefix = data[0]
                     handler_method = self.prefixes_to_methods[prefix]
-                    handler_method(self, data[1:].decode("utf-8", "replace"))
+                    handler_method(self, data[1:])
             except (ConnectionResetError, ConnectionAbortedError):
                 print("Zakończono połączenie.")
                 break

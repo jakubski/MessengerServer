@@ -13,13 +13,20 @@ class UserManager:
     _online_users = []
 
     @classmethod
+    def get_online_user_by_key(cls, key):
+        for user in cls._online_users:
+            if user.key == key:
+                return user
+
+        return None
+
+    @classmethod
     def sign_in(cls, login, socket):
         key = int()
 
         while True:
             key = randrange(0, cls._range)
-            if all(user.key != key
-                   for user in cls._online_users):
+            if cls.get_online_user_by_key(key) is None:
                 break
 
         cls._online_users.append(OnlineUser(login, key, socket))
