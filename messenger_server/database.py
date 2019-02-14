@@ -16,6 +16,9 @@ class ContactExistingError(Exception):
 class UserNotFoundError(Exception):
     pass
 
+class NoContatsError(Exception):
+    pass
+
 
 class DatabaseConnection:
     DBPATH = "database.db"
@@ -23,6 +26,7 @@ class DatabaseConnection:
     def __init__(self):
         self._connection = sqlite3.connect(self.DBPATH)
         self._cursor = self._connection.cursor()
+        self._cursor.execute("""PRAGMA foreign_keys=on""")
 
     def setup(self):
         try:
@@ -87,3 +91,11 @@ class DatabaseConnection:
                 raise e
         finally:
             self._connection.close()
+
+    def get_contacts_list(self, user):
+        self._cursor.execute("""SELECT contact FROM contacts
+                                WHERE user=?""", (user, ))
+        contacts = self._cursor.fetchall()
+
+        return contacts
+

@@ -1,5 +1,6 @@
 
 DELIMITER = b'\r'
+DELIMITER_STR = '\r'
 ENDIANNESS = "big"
 
 
@@ -34,6 +35,21 @@ class Responses:
         @classmethod
         def get_wrong_password_response(cls):
             FLAG = 2
+            return cls.PREFIX.to_bytes(1, ENDIANNESS) + FLAG.to_bytes(1, ENDIANNESS)
+
+    class GetContacts:
+        PREFIX = 0x03
+
+        @classmethod
+        def get_positive_response(cls, contacts):
+            FLAG = 0
+
+            return cls.PREFIX.to_bytes(1, ENDIANNESS) + FLAG.to_bytes(1, ENDIANNESS) + \
+                   DELIMITER + bytes(DELIMITER_STR.join([c[0] for c in contacts]), "utf-8")
+
+        @classmethod
+        def get_no_contacts_response(cls):
+            FLAG = 1
             return cls.PREFIX.to_bytes(1, ENDIANNESS) + FLAG.to_bytes(1, ENDIANNESS)
 
     class AddContactResponse:

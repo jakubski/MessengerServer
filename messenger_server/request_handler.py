@@ -57,13 +57,25 @@ class RequestHandler(socketserver.BaseRequestHandler):
 
         self.request.sendall(response)
 
-    def handle_logout_request(self, logout_request):
-        pass
+    def handle_get_contacts_request(self, get_contacts_request):
+        try:
+            key = int.from_bytes(get_contacts_request[:6], "big")
+            user = UserManager.get_online_user_by_key(key)
+            contacts = DatabaseConnection().get_contacts_list(user.login)
+            if len(contacts) > 0:
+                response = Responses.GetContacts.get_positive_response(contacts)
+            else:
+                response = Responses.GetContacts.get_no_contacts_response()
+        except ValueError:
+            raise InvalidRequestError()
+
+        self.request.sendall(response)
 
     prefixes_to_methods = {
         0x00: handle_signup_request,
         0x01: handle_login_request,
-        0x02: handle_logout_request,
+        # 0x02: handle_logout_request,
+        0x03: handle_get_contacts_request,
         0x04: handle_add_contact_request,
     }
 
