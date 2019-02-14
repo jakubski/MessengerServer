@@ -1,46 +1,50 @@
+
+DELIMITER = b'\r'
+ENDIANNESS = "big"
+
+
 class Responses:
 
     class SignUpResponse:
-        @staticmethod
-        def get_positive_response():
-            prefix = 0x00
-            flag = 0
-            return prefix.to_bytes(1, "big") + flag.to_bytes(1, "big")
+        PREFIX = 0x00
 
-        @staticmethod
-        def get_existing_login_response():
-            prefix = 0x00
-            flag = 4
-            return prefix.to_bytes(1, "big") + flag.to_bytes(1, "big")
+        @classmethod
+        def get_positive_response(cls):
+            FLAG = 0
+            return cls.PREFIX.to_bytes(1, ENDIANNESS) + FLAG.to_bytes(1, ENDIANNESS)
+
+        @classmethod
+        def get_existing_login_response(cls):
+            FLAG = 4
+            return cls.PREFIX.to_bytes(1, ENDIANNESS) + FLAG.to_bytes(1, ENDIANNESS)
 
     class LogInResponse:
-        @staticmethod
-        def get_positive_response(key):
-            prefix = 0x01
-            flag = 0
-            return prefix.to_bytes(1, "big") + flag.to_bytes(1, "big") + key.to_bytes(6, "big")
+        PREFIX = 0x01
 
-        @staticmethod
-        def get_wrong_login_response():
-            prefix = 0x01
-            flag = 1
-            return prefix.to_bytes(1, "big") + flag.to_bytes(1, "big")
+        @classmethod
+        def get_positive_response(cls, key):
+            FLAG = 0
+            return cls.PREFIX.to_bytes(1, ENDIANNESS) + FLAG.to_bytes(1, ENDIANNESS) + DELIMITER + key.to_bytes(6, ENDIANNESS)
 
-        @staticmethod
-        def get_wrong_password_response():
-            prefix = 0x01
-            flag = 2
-            return prefix.to_bytes(1, "big") + flag.to_bytes(1, "big")
+        @classmethod
+        def get_wrong_login_response(cls):
+            FLAG = 1
+            return cls.PREFIX.to_bytes(1, ENDIANNESS) + FLAG.to_bytes(1, ENDIANNESS)
+
+        @classmethod
+        def get_wrong_password_response(cls):
+            FLAG = 2
+            return cls.PREFIX.to_bytes(1, ENDIANNESS) + FLAG.to_bytes(1, ENDIANNESS)
 
     class AddContactResponse:
-        @staticmethod
-        def get_positive_response():
-            prefix = 0x04
-            flag = 0
-            return prefix.to_bytes(1, "big") + flag.to_bytes(1, "big")
+        PREFIX = 0x04
 
-        @staticmethod
-        def get_user_not_found_response():
-            prefix = 0x04
-            flag = 1
-            return prefix.to_bytes(1, "big") + flag.to_bytes(1, "big")
+        @classmethod
+        def get_positive_response(cls):
+            FLAG = 0
+            return cls.PREFIX.to_bytes(1, ENDIANNESS) + FLAG.to_bytes(1, ENDIANNESS)
+
+        @classmethod
+        def get_user_not_found_response(cls):
+            FLAG = 1
+            return cls.PREFIX.to_bytes(1, ENDIANNESS) + FLAG.to_bytes(1, ENDIANNESS)
