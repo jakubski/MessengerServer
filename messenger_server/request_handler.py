@@ -43,7 +43,7 @@ class RequestHandler(socketserver.BaseRequestHandler):
     def handle_add_contact_request(self, add_contact_request):
         try:
             key = int.from_bytes(add_contact_request[:6], "big")
-            contact_login = add_contact_request[6:].decode("utf-8", "replace")
+            contact_login = add_contact_request[7:].decode("utf-8", "replace")
             user = UserManager.get_online_user_by_key(key)
             DatabaseConnection().add_contact(user.login, contact_login)
             response = Responses.AddContactResponse.get_positive_response()
