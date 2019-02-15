@@ -1,4 +1,5 @@
 from random import randrange
+from messenger_server.config import DELIMITER, KEY_SIZE, ENDIANNESS
 
 
 class OnlineUser:
@@ -9,7 +10,7 @@ class OnlineUser:
 
 
 class UserManager:
-    _range = 1048575
+    _range = 4_294_967_294
     _online_users = []
 
     @classmethod
@@ -26,7 +27,8 @@ class UserManager:
 
         while True:
             key = randrange(0, cls._range)
-            if cls.get_online_user_by_key(key) is None:
+            if (cls.get_online_user_by_key(key) is None) and \
+               (key.to_bytes(KEY_SIZE, ENDIANNESS).find(DELIMITER) < 0):
                 break
 
         cls._online_users.append(OnlineUser(login, key, socket))

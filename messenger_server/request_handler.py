@@ -2,6 +2,7 @@ import socketserver
 from messenger_server.database import *
 from messenger_server.user_management import UserManager
 from messenger_server.responses import Responses
+from messenger_server.config import *
 
 
 class InvalidRequestError(Exception):
@@ -9,11 +10,10 @@ class InvalidRequestError(Exception):
 
 
 class RequestHandler(socketserver.BaseRequestHandler):
-    DELIMITER = '\r'
 
     def handle_signup_request(self, signup_request):
         try:
-            email, login, password = signup_request.decode("utf-8", "replace").split(self.DELIMITER)
+            email, login, password = signup_request.decode("utf-8", "replace").split(DELIMITER)
             DatabaseConnection().add_user(email, login, password)
             response = Responses.SignUpResponse.get_positive_response()
         except ValueError:
@@ -25,7 +25,7 @@ class RequestHandler(socketserver.BaseRequestHandler):
 
     def handle_login_request(self, login_request):
         try:
-            login, password = login_request.decode("utf-8", "replace").split(self.DELIMITER)
+            login, password = login_request.decode("utf-8", "replace").split(DELIMITER)
             DatabaseConnection().verify_login(login, password)
             key = UserManager.sign_in(login, self.request)
             response = Responses.LogInResponse.get_positive_response(key)
@@ -42,8 +42,8 @@ class RequestHandler(socketserver.BaseRequestHandler):
 
     def handle_add_contact_request(self, add_contact_request):
         try:
-            key = int.from_bytes(add_contact_request[:6], "big")
-            contact_login = add_contact_request[7:].decode("utf-8", "replace")
+            key = int.from_bytes(add_contact_request[:4], "big")
+            contact_login = add_contact_request[5:].decode("utf-8", "replace")
             user = UserManager.get_online_user_by_key(key)
             DatabaseConnection().add_contact(user.login, contact_login)
             response = Responses.AddContactResponse.get_positive_response()
@@ -59,7 +59,7 @@ class RequestHandler(socketserver.BaseRequestHandler):
 
     def handle_get_contacts_request(self, get_contacts_request):
         try:
-            key = int.from_bytes(get_contacts_request[:6], "big")
+            key = int.from_bytes(get_contacts_request[:4], "big")
             user = UserManager.get_online_user_by_key(key)
             contacts = DatabaseConnection().get_contacts_list(user.login)
             if len(contacts) > 0:

@@ -1,7 +1,4 @@
-
-DELIMITER = b'\r'
-DELIMITER_STR = '\r'
-ENDIANNESS = "big"
+from messenger_server.config import *
 
 
 class Responses:
@@ -12,12 +9,12 @@ class Responses:
         @classmethod
         def get_positive_response(cls):
             FLAG = 0
-            return cls.PREFIX.to_bytes(1, ENDIANNESS) + FLAG.to_bytes(1, ENDIANNESS)
+            return cls.PREFIX.to_bytes(PREFIX_SIZE, ENDIANNESS) + FLAG.to_bytes(FLAG_SIZE, ENDIANNESS)
 
         @classmethod
         def get_existing_login_response(cls):
             FLAG = 4
-            return cls.PREFIX.to_bytes(1, ENDIANNESS) + FLAG.to_bytes(1, ENDIANNESS)
+            return cls.PREFIX.to_bytes(PREFIX_SIZE, ENDIANNESS) + FLAG.to_bytes(FLAG_SIZE, ENDIANNESS)
 
     class LogInResponse:
         PREFIX = 0x01
@@ -25,17 +22,18 @@ class Responses:
         @classmethod
         def get_positive_response(cls, key):
             FLAG = 0
-            return cls.PREFIX.to_bytes(1, ENDIANNESS) + FLAG.to_bytes(1, ENDIANNESS) + DELIMITER + key.to_bytes(6, ENDIANNESS)
+            return cls.PREFIX.to_bytes(PREFIX_SIZE, ENDIANNESS) + FLAG.to_bytes(FLAG_SIZE, ENDIANNESS) + \
+                   DELIMITER + key.to_bytes(KEY_SIZE, ENDIANNESS)
 
         @classmethod
         def get_wrong_login_response(cls):
             FLAG = 1
-            return cls.PREFIX.to_bytes(1, ENDIANNESS) + FLAG.to_bytes(1, ENDIANNESS)
+            return cls.PREFIX.to_bytes(PREFIX_SIZE, ENDIANNESS) + FLAG.to_bytes(FLAG_SIZE, ENDIANNESS)
 
         @classmethod
         def get_wrong_password_response(cls):
             FLAG = 2
-            return cls.PREFIX.to_bytes(1, ENDIANNESS) + FLAG.to_bytes(1, ENDIANNESS)
+            return cls.PREFIX.to_bytes(PREFIX_SIZE, ENDIANNESS) + FLAG.to_bytes(FLAG_SIZE, ENDIANNESS)
 
     class GetContacts:
         PREFIX = 0x03
@@ -44,13 +42,13 @@ class Responses:
         def get_positive_response(cls, contacts):
             FLAG = 0
 
-            return cls.PREFIX.to_bytes(1, ENDIANNESS) + FLAG.to_bytes(1, ENDIANNESS) + \
-                   DELIMITER + bytes(DELIMITER_STR.join([c[0] for c in contacts]), "utf-8")
+            return cls.PREFIX.to_bytes(PREFIX_SIZE, ENDIANNESS) + FLAG.to_bytes(FLAG_SIZE, ENDIANNESS) + \
+                   DELIMITER + bytes(DELIMITER_STR.join(contacts), "utf-8")
 
         @classmethod
         def get_no_contacts_response(cls):
             FLAG = 1
-            return cls.PREFIX.to_bytes(1, ENDIANNESS) + FLAG.to_bytes(1, ENDIANNESS)
+            return cls.PREFIX.to_bytes(PREFIX_SIZE, ENDIANNESS) + FLAG.to_bytes(FLAG_SIZE, ENDIANNESS)
 
     class AddContactResponse:
         PREFIX = 0x04
@@ -58,9 +56,9 @@ class Responses:
         @classmethod
         def get_positive_response(cls):
             FLAG = 0
-            return cls.PREFIX.to_bytes(1, ENDIANNESS) + FLAG.to_bytes(1, ENDIANNESS)
+            return cls.PREFIX.to_bytes(PREFIX_SIZE, ENDIANNESS) + FLAG.to_bytes(FLAG_SIZE, ENDIANNESS)
 
         @classmethod
         def get_user_not_found_response(cls):
             FLAG = 1
-            return cls.PREFIX.to_bytes(1, ENDIANNESS) + FLAG.to_bytes(1, ENDIANNESS)
+            return cls.PREFIX.to_bytes(PREFIX_SIZE, ENDIANNESS) + FLAG.to_bytes(FLAG_SIZE, ENDIANNESS)

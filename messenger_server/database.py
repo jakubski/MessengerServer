@@ -97,5 +97,4 @@ class DatabaseConnection:
                                 WHERE user=?""", (user, ))
         contacts = self._cursor.fetchall()
 
-        return contacts
-
+        return [c[0] for c in contacts]
