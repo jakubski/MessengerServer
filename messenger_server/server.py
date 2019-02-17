@@ -7,6 +7,9 @@ ADDRESS = "127.0.0.1"
 PORT = 54321
 
 if __name__ == "__main__":
-    DatabaseConnection().setup()
-    server = ThreadingTCPServer((ADDRESS, PORT), RequestHandler)
-    server.serve_forever()
+    with ThreadingTCPServer((ADDRESS, PORT), RequestHandler) as server:
+        DatabaseConnection().setup()
+        try:
+            server.serve_forever()
+        except:
+            server.shutdown()
