@@ -15,7 +15,7 @@ class RequestHandler(socketserver.BaseRequestHandler):
 
     def handle_signup_request(self, signup_request):
         try:
-            email, login, password = signup_request.decode(ENCODING, "replace").split(DELIMITER)
+            email, login, password = signup_request.decode(ENCODING, "replace").split(DELIMITER_STR)
             DatabaseConnection().add_user(email, login, password)
             response = Responses.SignUpResponse.get_positive_response()
         except ValueError:
@@ -47,10 +47,11 @@ class RequestHandler(socketserver.BaseRequestHandler):
     def handle_add_contact_request(self, add_contact_request):
         try:
             key = int.from_bytes(add_contact_request[:4], ENDIANNESS)
-            contact_login = add_contact_request[5:].decode(ENCODING, "replace")
+            contact = add_contact_request[5:].decode(ENCODING, "replace")
             user = UserManager.get_online_user_by_key(key)
-            DatabaseConnection().add_contact(user.login, contact_login)
-            response = Responses.AddContactResponse.get_positive_response()
+            DatabaseConnection().add_contact(user.login, contact)
+            status = int(UserManager.get_online_user_by_login(contact) is None)
+            response = Responses.AddContactResponse.get_positive_response(status)
         except ValueError:
             raise InvalidRequestError()
         except ContactExistingError:

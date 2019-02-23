@@ -39,11 +39,11 @@ class Responses:
         PREFIX = 0x03
 
         @classmethod
-        def get_positive_response(cls, contacts):
+        def get_positive_response(cls, contacts_with_statuses):
             FLAG = 0
 
-            return cls.PREFIX.to_bytes(PREFIX_SIZE, ENDIANNESS) + FLAG.to_bytes(FLAG_SIZE, ENDIANNESS) + \
-                   DELIMITER + bytes(DELIMITER_STR.join([DELIMITER_STR.join((c[0], c[1])) for c in contacts]), ENCODING)
+            return cls.PREFIX.to_bytes(PREFIX_SIZE, ENDIANNESS) + FLAG.to_bytes(FLAG_SIZE, ENDIANNESS) + DELIMITER + \
+                   bytes(DELIMITER_STR.join([DELIMITER_STR.join((c[0], c[1])) for c in contacts_with_statuses]), ENCODING)
 
         @classmethod
         def get_no_contacts_response(cls):
@@ -54,9 +54,10 @@ class Responses:
         PREFIX = 0x04
 
         @classmethod
-        def get_positive_response(cls):
+        def get_positive_response(cls, status):
             FLAG = 0
-            return cls.PREFIX.to_bytes(PREFIX_SIZE, ENDIANNESS) + FLAG.to_bytes(FLAG_SIZE, ENDIANNESS)
+            return cls.PREFIX.to_bytes(PREFIX_SIZE, ENDIANNESS) + FLAG.to_bytes(FLAG_SIZE, ENDIANNESS) + DELIMITER + \
+                   status.to_bytes(STATUS_SIZE, ENDIANNESS)
 
         @classmethod
         def get_user_not_found_response(cls):
