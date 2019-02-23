@@ -22,6 +22,14 @@ class UserManager:
         return None
 
     @classmethod
+    def get_online_user_by_login(cls, login):
+        for user in cls._online_users:
+            if user.login == login:
+                return user
+
+        return None
+
+    @classmethod
     def sign_in(cls, login, socket):
         key = int()
 
@@ -31,6 +39,7 @@ class UserManager:
                (key.to_bytes(KEY_SIZE, ENDIANNESS).find(DELIMITER) < 0):
                 break
 
-        cls._online_users.append(OnlineUser(login, key, socket))
+        user = OnlineUser(login, key, socket)
+        cls._online_users.append(user)
 
-        return key
+        return user

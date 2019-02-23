@@ -96,5 +96,14 @@ class DatabaseConnection:
         self._cursor.execute("""SELECT contact FROM contacts
                                 WHERE user=?""", (user, ))
         contacts = self._cursor.fetchall()
+        self._connection.close()
 
         return [c[0] for c in contacts]
+
+    def get_users_with_contact(self, contact):
+        self._cursor.execute("""SELECT user FROM contacts
+                                WHERE contact=?""", (contact,))
+        users = self._cursor.fetchall()
+        self._connection.close()
+
+        return [u[0] for u in users]

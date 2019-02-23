@@ -1,6 +1,8 @@
 import socketserver
+from threading import Thread
 from messenger_server.database import *
 from messenger_server.user_management import UserManager
+from messenger_server.user_notifying import UserNotifier
 from messenger_server.responses import Responses
 from messenger_server.config import *
 
@@ -13,7 +15,7 @@ class RequestHandler(socketserver.BaseRequestHandler):
 
     def handle_signup_request(self, signup_request):
         try:
-            email, login, password = signup_request.decode("utf-8", "replace").split(DELIMITER)
+            email, login, password = signup_request.decode(ENCODING, "replace").split(DELIMITER)
             DatabaseConnection().add_user(email, login, password)
             response = Responses.SignUpResponse.get_positive_response()
         except ValueError:
@@ -25,12 +27,14 @@ class RequestHandler(socketserver.BaseRequestHandler):
 
     def handle_login_request(self, login_request):
         try:
-            login, password = login_request.decode("utf-8", "replace").split(DELIMITER)
+            login, password = login_request.decode(ENCODING, "replace").split(DELIMITER_STR)
             DatabaseConnection().verify_login(login, password)
-            key = UserManager.sign_in(login, self.request)
-            response = Responses.LogInResponse.get_positive_response(key)
-            # notify users who have this user in their contacts
-            # check for awaiting messages
+            user = UserManager.sign_in(login, self.request)
+            response = Responses.LogInResponse.get_positive_response(user.key)
+
+            notifier_thread_1 = Thread(target=UserNotifier.notify_users_of_contact_login, args=(user,))
+            notifier_thread_1.start()
+            # TODO: check for awaiting messages
         except ValueError:
             raise InvalidRequestError()
         except LoginNotFoundError:
@@ -42,15 +46,15 @@ class RequestHandler(socketserver.BaseRequestHandler):
 
     def handle_add_contact_request(self, add_contact_request):
         try:
-            key = int.from_bytes(add_contact_request[:4], "big")
-            contact_login = add_contact_request[5:].decode("utf-8", "replace")
+            key = int.from_bytes(add_contact_request[:4], ENDIANNESS)
+            contact_login = add_contact_request[5:].decode(ENCODING, "replace")
             user = UserManager.get_online_user_by_key(key)
             DatabaseConnection().add_contact(user.login, contact_login)
             response = Responses.AddContactResponse.get_positive_response()
         except ValueError:
             raise InvalidRequestError()
         except ContactExistingError:
-            # in theory the client side should prevent such travesty
+            # ideally the client side should prevent such possibility
             response = Responses.AddContactResponse.get_positive_response()
         except UserNotFoundError:
             response = Responses.AddContactResponse.get_user_not_found_response()
@@ -59,11 +63,13 @@ class RequestHandler(socketserver.BaseRequestHandler):
 
     def handle_get_contacts_request(self, get_contacts_request):
         try:
-            key = int.from_bytes(get_contacts_request[:4], "big")
+            key = int.from_bytes(get_contacts_request[:4], ENDIANNESS)
             user = UserManager.get_online_user_by_key(key)
             contacts = DatabaseConnection().get_contacts_list(user.login)
             if len(contacts) > 0:
-                response = Responses.GetContacts.get_positive_response(contacts)
+                contacts_with_statuses = \
+                    [(c, str(int(UserManager.get_online_user_by_login(c) is not None))) for c in contacts]
+                response = Responses.GetContacts.get_positive_response(contacts_with_statuses)
             else:
                 response = Responses.GetContacts.get_no_contacts_response()
         except ValueError:

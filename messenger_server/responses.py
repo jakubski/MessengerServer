@@ -43,7 +43,7 @@ class Responses:
             FLAG = 0
 
             return cls.PREFIX.to_bytes(PREFIX_SIZE, ENDIANNESS) + FLAG.to_bytes(FLAG_SIZE, ENDIANNESS) + \
-                   DELIMITER + bytes(DELIMITER_STR.join(contacts), "utf-8")
+                   DELIMITER + bytes(DELIMITER_STR.join([DELIMITER_STR.join((c[0], c[1])) for c in contacts]), ENCODING)
 
         @classmethod
         def get_no_contacts_response(cls):
@@ -62,3 +62,11 @@ class Responses:
         def get_user_not_found_response(cls):
             FLAG = 1
             return cls.PREFIX.to_bytes(PREFIX_SIZE, ENDIANNESS) + FLAG.to_bytes(FLAG_SIZE, ENDIANNESS)
+
+    class StatusUpdateNotification:
+        PREFIX = 0x05
+
+        @classmethod
+        def get_status_update_notification(cls, user, status):
+            return cls.PREFIX.to_bytes(PREFIX_SIZE, ENDIANNESS) + bytes(user, ENCODING) + \
+                   DELIMITER + status.to_bytes(STATUS_SIZE, ENDIANNESS)
