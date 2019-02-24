@@ -69,7 +69,7 @@ class RequestHandler(socketserver.BaseRequestHandler):
             contacts = DatabaseConnection().get_contacts_list(user.login)
             if len(contacts) > 0:
                 contacts_with_statuses = \
-                    [(c, str(int(UserManager.get_online_user_by_login(c) is not None))) for c in contacts]
+                    [(c, int(UserManager.get_online_user_by_login(c) is not None)) for c in contacts]
                 response = Responses.GetContacts.get_positive_response(contacts_with_statuses)
             else:
                 response = Responses.GetContacts.get_no_contacts_response()
