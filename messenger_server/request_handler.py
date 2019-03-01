@@ -50,7 +50,7 @@ class RequestHandler(socketserver.BaseRequestHandler):
             contact = add_contact_request[5:].decode(ENCODING, "replace")
             user = UserManager.get_online_user_by_key(key)
             DatabaseConnection().add_contact(user.login, contact)
-            status = int(UserManager.get_online_user_by_login(contact) is None)
+            status = int(UserManager.get_online_user_by_login(contact) is not None)
             response = Responses.AddContactResponse.get_positive_response(status)
         except ValueError:
             raise InvalidRequestError()
@@ -78,12 +78,27 @@ class RequestHandler(socketserver.BaseRequestHandler):
 
         self.request.sendall(response)
 
+    def handle_incoming_message(self, incoming_message_request):
+        try:
+            key_b, contact_b, message_b = incoming_message_request.split(DELIMITER)
+            key = int.from_bytes(key_b, ENDIANNESS)
+            contact_login = contact_b.decode(ENCODING, "replace")
+            message = message_b.decode(ENCODING, "replace")
+            user = UserManager.get_online_user_by_key(key)
+            contact = UserManager.get_online_user_by_login(contact_login)
+            if contact is not None:
+                UserNotifier.send_message(user, contact, message)
+            # TODO: store in database
+        except ValueError:
+            raise InvalidRequestError()
+
     prefixes_to_methods = {
         0x00: handle_signup_request,
         0x01: handle_login_request,
         # 0x02: handle_logout_request,
         0x03: handle_get_contacts_request,
         0x04: handle_add_contact_request,
+        0x06: handle_incoming_message,
     }
 
     def handle(self):

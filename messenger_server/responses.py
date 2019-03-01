@@ -35,6 +35,14 @@ class Responses:
             FLAG = 2
             return cls.PREFIX.to_bytes(PREFIX_SIZE, ENDIANNESS) + FLAG.to_bytes(FLAG_SIZE, ENDIANNESS)
 
+    class MessageNotification:
+        PREFIX = 0x02
+
+        @classmethod
+        def get_message_notification(cls, sender, message):
+            return cls.PREFIX.to_bytes(PREFIX_SIZE, ENDIANNESS) + bytes(sender, ENCODING) + DELIMITER + \
+                   bytes(message, ENCODING)
+
     class GetContacts:
         PREFIX = 0x03
 

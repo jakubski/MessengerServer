@@ -1,4 +1,3 @@
-import socketserver
 from messenger_server.database import DatabaseConnection
 from messenger_server.user_management import UserManager
 from messenger_server.responses import Responses
@@ -14,3 +13,9 @@ class UserNotifier:
                 online_user = UserManager.get_online_user_by_login(user)
                 if online_user is not None:
                     online_user.socket.sendall(notification)
+
+    @staticmethod
+    def send_message(sender, recipient, message):
+        notification = Responses.MessageNotification.get_message_notification(sender.login, message)
+        recipient.socket.sendall(notification)
+        # TODO: save to database
