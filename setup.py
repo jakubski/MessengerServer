@@ -6,6 +6,7 @@ setup(
     packages=['messenger_server'],
     url='',
     license='MIT',
+    tests_require=['pytest'],
     author='Jakub Kucharski, Adam Kuder',
     author_email='',
     description=''
