@@ -1,8 +1,10 @@
+""" Application entry point """
+
 from socketserver import ThreadingTCPServer
 from messenger_server.request_handler import RequestHandler
 from messenger_server.database import DatabaseConnection
 
-""" Main application """
+
 ADDRESS = "127.0.0.1"
 PORT = 54321
 

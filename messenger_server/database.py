@@ -16,7 +16,7 @@ class ContactExistingError(Exception):
 class UserNotFoundError(Exception):
     pass
 
-class NoContatsError(Exception):
+class NoContactsError(Exception):
     pass
 
 
@@ -31,7 +31,7 @@ class DatabaseConnection:
     def setup(self):
         try:
             self._cursor.execute("""PRAGMA foreign_keys=on""")
-            self._cursor.execute("""CREATE TABLE IF NOT EXISTS 
+            self._cursor.execute("""CREATE TABLE IF NOT EXISTS
                               users(login TEXT PRIMARY KEY, email TEXT, password TEXT)""")
             self._cursor.execute("""CREATE TABLE IF NOT EXISTS
                               contacts(user TEXT, contact TEXT,

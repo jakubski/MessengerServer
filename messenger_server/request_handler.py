@@ -56,7 +56,7 @@ class RequestHandler(socketserver.BaseRequestHandler):
             raise InvalidRequestError()
         except ContactExistingError:
             # ideally the client side should prevent such possibility
-            response = Responses.AddContactResponse.get_positive_response()
+            response = Responses.AddContactResponse.get_positive_response(status)
         except UserNotFoundError:
             response = Responses.AddContactResponse.get_user_not_found_response()
 
@@ -67,7 +67,7 @@ class RequestHandler(socketserver.BaseRequestHandler):
             key = int.from_bytes(get_contacts_request[:4], ENDIANNESS)
             user = UserManager.get_online_user_by_key(key)
             contacts = DatabaseConnection().get_contacts_list(user.login)
-            if len(contacts) > 0:
+            if contacts:
                 contacts_with_statuses = \
                     [(c, int(UserManager.get_online_user_by_login(c) is not None)) for c in contacts]
                 response = Responses.GetContacts.get_positive_response(contacts_with_statuses)
