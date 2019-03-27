@@ -7,16 +7,11 @@ Welcome to MessengerServer's documentation!
 ===========================================
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :maxdepth: 4
+   :caption: Reference documentation
 
-   test.rst
+   .. automodule:: messenger_server.user_managements
+   modules.rst
 
 
 
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
