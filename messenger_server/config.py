@@ -7,3 +7,5 @@ PREFIX_SIZE = 1
 FLAG_SIZE = 1
 KEY_SIZE = 4
 STATUS_SIZE = 1
+DBPATH = "database.db"
+TEST_DBPATH = ":memory:"

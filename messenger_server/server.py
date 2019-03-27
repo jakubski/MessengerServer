@@ -1,4 +1,4 @@
-""" Application entry point """
+""" Application's entry point """
 
 from socketserver import ThreadingTCPServer
 from messenger_server.request_handler import RequestHandler

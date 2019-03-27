@@ -12,8 +12,25 @@ class InvalidRequestError(Exception):
 
 
 class RequestHandler(socketserver.BaseRequestHandler):
+    """Class used to handle each TCP request.
+
+    As required by :py:class:`socketserver.BaseServer` this class inherits
+    from :py:class:`socketserver.BaseRequestHandler` and is provided
+    to the :py:class:`socketserver.TCPServer` to be instantiated for every
+    incoming request and call the :py:func:`handle` function.
+
+    :param request: a socket created by the request
+    :type request: :py:class:`socket.socket`
+    :param prefixes_to_methods: mapping of requests' prefixes to appropriate handling methods
+    :type prefixes_to_methods: dict(int, function)
+    """
 
     def handle_signup_request(self, signup_request):
+        """Perform user sign-up and send adequate response.
+
+        :param signup_request: Sign-up request without the prefix
+        :type signup_request: bytes
+        """
         try:
             email, login, password = signup_request.decode(ENCODING, "replace").split(DELIMITER_STR)
             DatabaseConnection().add_user(email, login, password)
@@ -26,6 +43,11 @@ class RequestHandler(socketserver.BaseRequestHandler):
         self.request.sendall(response)
 
     def handle_login_request(self, login_request):
+        """Perform user log-in and send adequate response.
+
+        :param login_request: Log-in request without the prefix
+        :type login_request: bytes
+        """
         try:
             login, password = login_request.decode(ENCODING, "replace").split(DELIMITER_STR)
             DatabaseConnection().verify_login(login, password)
@@ -45,6 +67,11 @@ class RequestHandler(socketserver.BaseRequestHandler):
         self.request.sendall(response)
 
     def handle_add_contact_request(self, add_contact_request):
+        """Perform adding user's contact and send adequate response.
+
+        :param add_contact_request: Add-contact request without the prefix
+        :type add_contact_request: bytes
+        """
         try:
             key = int.from_bytes(add_contact_request[:4], ENDIANNESS)
             contact = add_contact_request[5:].decode(ENCODING, "replace")
@@ -63,6 +90,11 @@ class RequestHandler(socketserver.BaseRequestHandler):
         self.request.sendall(response)
 
     def handle_get_contacts_request(self, get_contacts_request):
+        """Perform fetching user's contact list and send adequate response.
+
+        :param get_contacts_request: Get-contacts request without the prefix
+        :type get_contacts_request: bytes
+        """
         try:
             key = int.from_bytes(get_contacts_request[:4], ENDIANNESS)
             user = UserManager.get_online_user_by_key(key)
@@ -79,6 +111,11 @@ class RequestHandler(socketserver.BaseRequestHandler):
         self.request.sendall(response)
 
     def handle_incoming_message(self, incoming_message_request):
+        """Perform passing a message to another user and other adequate actions.
+
+        :param incoming_message_request: Incoming message without the prefix
+        :type incoming_message_request: bytes
+        """
         try:
             key_b, contact_b, message_b = incoming_message_request.split(DELIMITER)
             key = int.from_bytes(key_b, ENDIANNESS)
@@ -102,6 +139,12 @@ class RequestHandler(socketserver.BaseRequestHandler):
     }
 
     def handle(self):
+        """Retrieve incoming data and execute adequate handler function.
+
+        When data has been received from the socket, the first byte is used
+        to determine the type of the request, in accordance with the protocol.
+        Corresponding method is then passed the received data minus the first byte.
+        """
         while True:
             try:
                 data = self.request.recv(1024)
