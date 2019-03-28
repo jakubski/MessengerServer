@@ -1,5 +1,5 @@
 """The following classes are oriented toward working with users as they are signed-in
-(i.e. have established a socket connection with the server and authenticated themselves."""
+(i.e. have established a socket connection with the server and authenticated themselves)."""
 from random import randrange
 from messenger_server.config import DELIMITER, KEY_SIZE, ENDIANNESS
 

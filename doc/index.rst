@@ -10,7 +10,6 @@ Welcome to MessengerServer's documentation!
    :maxdepth: 4
    :caption: Reference documentation
 
-   .. automodule:: messenger_server.user_managements
    modules.rst
 
 
